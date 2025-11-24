@@ -1,6 +1,7 @@
 # Lucas Behavior Tracker
 
 <!-- Trigger deployment to pick up Azure environment variables -->
+<!-- Force fresh deployment: 2025-11-24 1:56 PM -->
 
 A mobile-friendly web application for tracking daily behavior patterns, medications, and progress over time. Built specifically for tracking neurodivergent children's behaviors with a focus on simplicity and long-term sustainability.
 
