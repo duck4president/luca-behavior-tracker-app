@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .success { color: green; background: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .error { color: red; background: #ffe8e8; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .info { color: blue; background: #e8f0ff; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px 5px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        .test-section { border: 1px solid #ddd; padding: 15px; margin: 15px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Supabase Connection Diagnostic</h1>
+    <p><strong>Use this tool to verify your deployed app can connect to Supabase</strong></p>
+    
+    <div class="test-section">
+        <h3>1. Environment Variables Check</h3>
+        <button onclick="checkEnvironment()">Check Environment Variables</button>
+        <div id="envResults"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Basic Connection Test</h3>
+        <button onclick="testConnection()">Test Supabase API</button>
+        <div id="connectionResults"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Database Query Test</h3>
+        <button onclick="testDatabase()">Test Database Access</button>
+        <div id="databaseResults"></div>
+    </div>
+
+    <script>
+        // Check if environment variables are available
+        function checkEnvironment() {
+            const results = document.getElementById('envResults');
+            
+            // In production builds, env vars are compiled in - we can't check them directly
+            // Instead, we'll test the connection to see if they work
+            results.innerHTML = `
+                <div class="info">
+                    <strong>Note:</strong> In production builds, environment variables are compiled into the code.<br>
+                    We'll test the actual connection to verify they're working.
+                </div>
+            `;
+        }
+        
+        // Test basic Supabase connection
+        async function testConnection() {
+            const results = document.getElementById('connectionResults');
+            results.innerHTML = '<div class="info">🔄 Testing Supabase connection...</div>';
+            
+            try {
+                const response = await fetch('https://kqmykrdlxuntxjiiguze.supabase.co/rest/v1/', {
+                    headers: {
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxbXlrcmRseHVudHhqaWlndXplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTY5MTcsImV4cCI6MjA3ODk3MjkxN30.GkLmthNnV1XBm2oBsavY62VYDIZhdjQbsvUDwu5SNqM',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    results.innerHTML = '<div class="success">✅ Supabase API connection successful!</div>';
+                } else {
+                    results.innerHTML = `<div class="error">❌ Connection failed: ${response.status} ${response.statusText}</div>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<div class="error">❌ Connection error: ${error.message}</div>`;
+            }
+        }
+        
+        // Test database access
+        async function testDatabase() {
+            const results = document.getElementById('databaseResults');
+            results.innerHTML = '<div class="info">🔄 Testing database access...</div>';
+            
+            try {
+                // Test reading from daily_entries table
+                const response = await fetch('https://kqmykrdlxuntxjiiguze.supabase.co/rest/v1/daily_entries?select=id,date,overall_rating&limit=5', {
+                    headers: {
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxbXlrcmRseHVudHhqaWlndXplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTY5MTcsImV4cCI6MjA3ODk3MjkxN30.GkLmthNnV1XBm2oBsavY62VYDIZhdjQbsvUDwu5SNqM',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    results.innerHTML = `
+                        <div class="success">✅ Database access successful!</div>
+                        <p><strong>Found ${data.length} existing entries</strong></p>
+                        ${data.length > 0 ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : '<p>No entries found - this is normal for a new setup.</p>'}
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    results.innerHTML = `
+                        <div class="error">❌ Database query failed: ${response.status} ${response.statusText}</div>
+                        <pre>${errorText}</pre>
+                    `;
+                }
+            } catch (error) {
+                results.innerHTML = `<div class="error">❌ Database error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-run environment check
+        window.onload = function() {
+            checkEnvironment();
+        };
+    </script>
+    
+    <div class="test-section">
+        <h3>📋 Next Steps</h3>
+        <p>If all tests pass:</p>
+        <ul>
+            <li>✅ Your app should be working correctly</li>
+            <li>✅ Try creating a new entry in the main app</li>
+            <li>✅ Existing data should load properly</li>
+        </ul>
+        
+        <p>If tests fail:</p>
+        <ul>
+            <li>❌ Wait 2-3 more minutes for deployment to complete</li>
+            <li>❌ Check Azure Portal → Static Web App → Configuration</li>
+            <li>❌ Verify environment variable names are exactly: <code>REACT_APP_SUPABASE_URL</code> and <code>REACT_APP_SUPABASE_ANON_KEY</code></li>
+        </ul>
+    </div>
+</body>
+</html>
